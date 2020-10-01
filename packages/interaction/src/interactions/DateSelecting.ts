@@ -24,6 +24,8 @@ export class DateSelecting extends Interaction {
     let { component } = settings
     let { options } = component.context
 
+    console.log("DateSelecting constructor() settings:", settings, "this:", this);
+
     let dragging = this.dragging = new FeaturefulElementDragging(settings.el)
     dragging.touchScrollAllowed = false
     dragging.minDistance = options.selectMinDistance || 0
@@ -62,6 +64,8 @@ export class DateSelecting extends Interaction {
     let { context } = this.component
     let dragSelection: DateSpan | null = null
     let isInvalid = false
+
+    console.log("DateSelecting handleHitUpdate() hit:", hit);
 
     if (hit) {
       dragSelection = joinHitsIntoSelection(

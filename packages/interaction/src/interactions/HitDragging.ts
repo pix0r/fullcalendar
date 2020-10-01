@@ -50,6 +50,8 @@ export class HitDragging {
     dragging.emitter.on('pointerup', this.handlePointerUp)
     dragging.emitter.on('dragend', this.handleDragEnd)
 
+    console.log("HitDragging constructor() this:", this, "arguments:", arguments);
+
     this.dragging = dragging
     this.emitter = new Emitter()
   }
@@ -204,6 +206,8 @@ export class HitDragging {
         }
       }
     }
+
+    // console.log(`HitDragging queryHitForOffset(left:${offsetLeft} top:${offsetTop}) returning:`, bestHit, "droppableStore:", droppableStore);
 
     return bestHit
   }

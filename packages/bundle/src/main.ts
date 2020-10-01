@@ -1,3 +1,5 @@
+import 'preact/debug'
+console.log("imported preact/debug")
 
 export * from '@fullcalendar/core'
 export * from '@fullcalendar/interaction'
