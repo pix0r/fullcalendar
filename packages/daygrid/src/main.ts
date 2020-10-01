@@ -4,6 +4,7 @@ import { TableDateProfileGenerator } from './TableDateProfileGenerator'
 import { OPTION_REFINERS } from './options'
 import './options-declare'
 import './main.css'
+// import { reduceMorePopover } from './reducers/more-popover-state';
 
 export * from './api-type-deps'
 export { DayTable, DayTableSlicer } from './DayTable'
@@ -17,6 +18,9 @@ export { DayTableView as DayGridView } // export as old name!
 export default createPlugin({
   initialView: 'dayGridMonth',
   optionRefiners: OPTION_REFINERS,
+  reducers: [
+    // reduceMorePopover,
+  ],
   views: {
 
     dayGrid: {

@@ -53,7 +53,7 @@ interface TableState {
   morePopoverState: MorePopoverState | null
 }
 
-interface MorePopoverState extends MoreLinkArg {
+export interface MorePopoverState extends MoreLinkArg {
   currentFgEventSegs: TableSeg[]
 }
 
