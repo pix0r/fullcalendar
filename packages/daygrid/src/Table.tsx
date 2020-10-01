@@ -55,6 +55,7 @@ interface TableState {
 
 interface MorePopoverState extends MoreLinkArg {
   currentFgEventSegs: TableSeg[]
+  hitLayer: number
 }
 
 
@@ -76,6 +77,16 @@ export class Table extends DateComponent<TableProps, TableState> {
     morePopoverState: null
   }
 
+  constructor() {
+    super()
+
+    // Extremely ugly hack to register a callback so we can respond to calendar.disableDropOnMorePopover()
+    const g = window as any;
+    if (typeof g.fcMorePopoverDisableDropMethods === 'undefined') {
+      g.fcMorePopoverDisableDropMethods = [];
+    }
+    g.fcMorePopoverDisableDropMethods.push(this.handleMorePopoverDisableDrop);
+  }
 
   render() {
     let { props } = this
@@ -173,6 +184,7 @@ export class Table extends DateComponent<TableProps, TableState> {
                     {}
                   }
                   todayRange={todayRange}
+                  hitLayer={morePopoverState.hitLayer}
                 />
               }
             </Fragment>
@@ -221,7 +233,8 @@ export class Table extends DateComponent<TableProps, TableState> {
       this.setState({
         morePopoverState: {
           ...arg,
-          currentFgEventSegs: this.props.fgEventSegs
+          currentFgEventSegs: this.props.fgEventSegs,
+          hitLayer: 1
         }
       })
 
@@ -235,6 +248,17 @@ export class Table extends DateComponent<TableProps, TableState> {
     this.setState({
       morePopoverState: null
     })
+  }
+
+
+  handleMorePopoverDisableDrop = () => {
+    // If "More Events" popover is displayed, change its hitLayer to -1
+    // Otherwise, do nothing
+    const newState: TableState = { ...this.state };
+    if (newState.morePopoverState) {
+      newState.morePopoverState.hitLayer = -1;
+      this.setState(newState);
+    }
   }
 
 
