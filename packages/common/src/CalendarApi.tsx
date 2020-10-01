@@ -270,6 +270,14 @@ export class CalendarApi {
   }
 
 
+  closeMorePopover() {
+    console.debug('closeMorePopover()')
+    this.dispatch({
+      type: 'CLOSE_MORE_POPOVER'
+    })
+  }
+
+
   // for external API
   getDate(): Date {
     let state = this.getCurrentData()
