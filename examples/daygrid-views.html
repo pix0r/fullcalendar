@@ -3,13 +3,114 @@
 <head>
 <meta charset='utf-8' />
 <link href='../packages/bundle/main.css' rel='stylesheet' />
+<style type="text/css">
+  .fc-more-popover {
+    display: var(--fc-more-popover-display, block);
+    z-index: var(--fc-more-popover-z-index, 8);
+  }
+  .fc-more-popover, .fc-more-popover * {
+    background-color: yellow;
+  }
+</style>
 <script src='../packages/bundle/main.js'></script>
 <script>
 
   document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
 
+    function hideCalendarWithStyles() {
+      console.log("hideCalendarWithStyles()");
+      calendarEl.style.setProperty('--fc-more-popover-display', 'none');
+      calendarEl.style.setProperty('--fc-more-popover-z-index', -100);
+    }
+
+    function removeMorePopover() {
+      console.log("removeMorePopover()");
+      const morePopoverEl = calendarEl.querySelector('.fc-more-popover');
+      if (morePopoverEl) {
+        console.log("Removing more popover:", morePopoverEl);
+        const result = morePopoverEl.remove();
+        console.log("result of remove():", result);
+        setTimeout(function() {
+          console.log("removeMorePopover() after timeout.. morePopoverEl:", morePopoverEl);
+          const newMorePopoverEl = calendarEl.querySelector('.fc-more-popover');
+          console.log("removeMorePopover() NEW popover:", newMorePopoverEl);
+          // it's the same
+          // let's remove again??
+
+          console.log("Removing more popover (again)");
+          morePopoverEl.remove();
+        });
+      } else {
+        console.log("Didn't find more popover");
+      }
+    }
+
+    function clickCloseMorePopover() {
+      console.log("clickCloseMorePopover()");
+      const closeButtonEl = calendarEl.querySelector('.fc-more-popover .fc-popover-close');
+      if (closeButtonEl) {
+        console.log("Found close button:", closeButtonEl, "generating click event...");
+        const clickEvent = new MouseEvent("click", {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+        });
+        const result = closeButtonEl.dispatchEvent(clickEvent);
+        console.log("Clicked close button with result:", result);
+      } else {
+        console.log("Didn't find close button");
+      }
+    }
+
+    function resetCalendarStyles() {
+      console.log("resetCalendarStyles()");
+      calendarEl.style.setProperty('--fc-more-popover-display', 'block');
+      calendarEl.style.setProperty('--fc-more-popover-z-index', 8);
+    }
+
     var calendar = new FullCalendar.Calendar(calendarEl, {
+      eventDragStart: function eventDragStart(info) {
+        console.log("eventDragStart() info:", info);
+        const popoverEl = info.el.closest('.fc-more-popover');
+        if (popoverEl) {
+          // hideCalendarWithStyles();
+          // removeMorePopover();
+          // setInterval(function() {
+          //   removeMorePopover();
+          // }, 1000);
+
+          // setTimeout(function() {
+          //   console.log("eventDragStart() going to click close...");
+          //   clickCloseMorePopover();
+          // }, 1000);
+
+          setTimeout(function() {
+            console.log("calling calendar.closeMorePopover()");
+            calendar.closeMorePopover();
+          }, 2000);
+        }
+      },
+      eventDragStop: function eventDragStop(info) {
+        console.log("eventDragStop() info:", info);
+        // clickCloseMorePopover();
+        // resetCalendarStyles();
+
+        // setTimeout(function() {
+        //   console.log("eventDragStop() clicking close and resetting calendar styles");
+        //   clickCloseMorePopover();
+        //   resetCalendarStyles();
+        // }, 1000);
+        // setTimeout(resetCalendarStyles, 1000);
+      },
+      eventDrop: function eventDrop(info) {
+        console.log("eventDrop() info:", info);
+        // setTimeout(function() {
+        //   console.log("eventDrop() clicking close more popover and resetting");
+        //   clickCloseMorePopover();
+        //   resetCalendarStyles();
+        // });
+      },
       headerToolbar: {
         left: 'prevYear,prev,next,nextYear today',
         center: 'title',
@@ -62,6 +163,46 @@
           start: '2020-09-12T17:30:00'
         },
         {
+          title: 'Happy Hour',
+          start: '2020-09-12T17:30:00'
+        },
+        {
+          title: 'Happy Hour',
+          start: '2020-09-12T17:30:00'
+        },
+        {
+          title: 'Happy Hour',
+          start: '2020-09-12T17:30:00'
+        },
+        {
+          title: 'Happy Hour',
+          start: '2020-09-12T17:30:00'
+        },
+        {
+          title: 'Happy Hour',
+          start: '2020-09-12T17:30:00'
+        },
+        {
+          title: 'Happy Hour',
+          start: '2020-09-12T17:30:00'
+        },
+        {
+          title: 'Happy Hour',
+          start: '2020-09-12T17:30:00'
+        },
+        {
+          title: 'Happy Hour',
+          start: '2020-09-12T17:30:00'
+        },
+        {
+          title: 'Happy Hour',
+          start: '2020-09-12T17:30:00'
+        },
+        {
+          title: 'Happy Hour',
+          start: '2020-09-12T17:30:00'
+        },
+        {
           title: 'Dinner',
           start: '2020-09-12T20:00:00'
         },
@@ -78,6 +219,11 @@
     });
 
     calendar.render();
+
+    document.getElementById('close-more-popover').onclick = function() {
+      console.log('clicked');
+      calendar.closeMorePopover();
+    };
   });
 
 </script>
@@ -100,6 +246,8 @@
 <body>
 
   <div id='calendar'></div>
+
+  <button id='close-more-popover'>Close More Popover</button>
 
 </body>
 </html>
