@@ -26,11 +26,11 @@ const linkPkgSubdirs = exports.linkPkgSubdirs = series(
   // rewire the @fullcalendar/angular package.
   // we still want yarn to install its dependencies,
   // but we want other packages to reference it by its dist/fullcalendar folder
-  execTask('rm -f node_modules/@fullcalendar/angular'),
+  execTask('rm -rf node_modules/@fullcalendar/angular'),
   execTask('ln -s ../../packages-contrib/angular/dist/fullcalendar node_modules/@fullcalendar/angular'),
 
   // same concept for fullcalendar-tests
-  execTask('rm -f node_modules/fullcalendar-tests'),
+  execTask('rm -rf node_modules/fullcalendar-tests'),
   execTask('ln -s ../packages/__tests__/tsc node_modules/fullcalendar-tests')
 )
 
