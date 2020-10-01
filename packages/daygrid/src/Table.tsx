@@ -85,7 +85,15 @@ export class Table extends DateComponent<TableProps, TableState> {
     (window as any).fcMorePopoverCloseMethods.push(this.handleMorePopoverClose);
   }
 
+  setState(state: TableState) {
+    console.log("Table.setState() arguments:", arguments);
+    super.setState(state);
+  }
+
   render() {
+    console.log("Table.render() state:", this.state);
+    console.log("Table.render() props", this.props);
+
     let { props } = this
     let { dateProfile, dayMaxEventRows, dayMaxEvents, expandRows } = props
     let { morePopoverState } = this.state
