@@ -76,6 +76,14 @@ export class Table extends DateComponent<TableProps, TableState> {
     morePopoverState: null
   }
 
+  constructor() {
+    super()
+    // This is horrible
+    if (typeof (window as any).fcMorePopoverCloseMethods === 'undefined') {
+      (window as any).fcMorePopoverCloseMethods = [];
+    }
+    (window as any).fcMorePopoverCloseMethods.push(this.handleMorePopoverClose);
+  }
 
   render() {
     let { props } = this
