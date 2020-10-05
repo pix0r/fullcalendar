@@ -16,6 +16,7 @@ export interface MorePopoverProps {
   topAlignmentEl?: HTMLElement
   onCloseClick?: () => void
   todayRange: DateRange
+  hitLayer: number | null
 }
 
 
@@ -104,7 +105,13 @@ export class MorePopover extends DateComponent<MorePopoverProps> {
   queryHit(positionLeft: number, positionTop: number, elWidth: number, elHeight: number): Hit | null {
     let date = this.props.date
 
+    console.debug(`MorePopover.queryHit() arguments:`, arguments);
+
     if (positionLeft < elWidth && positionTop < elHeight) {
+      // console.debug(`MorePopover.queryHit() should return an object; instead skipping`);
+      // return undefined;
+
+      console.debug(`MorePopover.queryHit() returning an object with layer: ${this.props.hitLayer}`);
       return {
         component: this,
         dateSpan: {
@@ -118,8 +125,10 @@ export class MorePopover extends DateComponent<MorePopoverProps> {
           right: elWidth,
           bottom: elHeight
         },
-        layer: 1
+        layer: this.props.hitLayer,
       }
+    } else {
+      console.debug(`MorePopover.queryHit() returning undefined`);
     }
   }
 

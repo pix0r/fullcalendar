@@ -5,11 +5,8 @@
 <link href='../packages/bundle/main.css' rel='stylesheet' />
 <style type="text/css">
   .fc-more-popover {
-    display: var(--fc-more-popover-display, block);
-    z-index: var(--fc-more-popover-z-index, 8);
-  }
-  .fc-more-popover, .fc-more-popover * {
-    background-color: yellow;
+    opacity: var(--fc-more-popover-opacity, 1.0);
+    transition: opacity 1s;
   }
 </style>
 <script src='../packages/bundle/main.js'></script>
@@ -46,6 +43,10 @@
       }
     }
 
+    function fadeOutMorePopover() {
+      calendarEl.style.setProperty('--fc-more-popover-opacity', 0.25);
+    }
+
     function clickCloseMorePopover() {
       console.log("clickCloseMorePopover()");
       const closeButtonEl = calendarEl.querySelector('.fc-more-popover .fc-popover-close');
@@ -67,6 +68,7 @@
       console.log("resetCalendarStyles()");
       calendarEl.style.setProperty('--fc-more-popover-display', 'block');
       calendarEl.style.setProperty('--fc-more-popover-z-index', 8);
+      calendarEl.style.setProperty('--fc-more-popover-opacity', 1.0);
     }
 
     var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -74,34 +76,24 @@
         console.log("eventDragStart() info:", info);
         const popoverEl = info.el.closest('.fc-more-popover');
         if (popoverEl) {
-          // hideCalendarWithStyles();
-          // removeMorePopover();
-          // setInterval(function() {
-          //   removeMorePopover();
-          // }, 1000);
-
-          // setTimeout(function() {
-          //   console.log("eventDragStart() going to click close...");
-          //   clickCloseMorePopover();
-          // }, 1000);
-
           setTimeout(function() {
-            console.log("calling calendar.closeMorePopover()");
-            calendar.closeMorePopover();
-          }, 2000);
+            console.log("Fading out more popover");
+            fadeOutMorePopover();
+
+            console.log("also disabling drop");
+            calendar.disableDropOnMorePopover();
+          });
         }
       },
       eventDragStop: function eventDragStop(info) {
         console.log("eventDragStop() info:", info);
-        // clickCloseMorePopover();
-        // resetCalendarStyles();
-
-        // setTimeout(function() {
-        //   console.log("eventDragStop() clicking close and resetting calendar styles");
-        //   clickCloseMorePopover();
-        //   resetCalendarStyles();
-        // }, 1000);
-        // setTimeout(resetCalendarStyles, 1000);
+        const popoverEl = info.el.closest('.fc-more-popover');
+        if (popoverEl) {
+          setTimeout(function() {
+            console.log("resetting calendar styles");
+            resetCalendarStyles();
+          });
+        }
       },
       eventDrop: function eventDrop(info) {
         console.log("eventDrop() info:", info);
