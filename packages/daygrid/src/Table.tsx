@@ -79,28 +79,16 @@ export class Table extends DateComponent<TableProps, TableState> {
 
   constructor() {
     super()
-    // This is horrible
-    if (typeof (window as any).fcMorePopoverCloseMethods === 'undefined') {
-      (window as any).fcMorePopoverCloseMethods = [];
-    }
-    (window as any).fcMorePopoverCloseMethods.push(this.handleMorePopoverClose);
 
-    // This is horrible
-    if (typeof (window as any).fcMorePopoverDisableDropMethods === 'undefined') {
-      (window as any).fcMorePopoverDisableDropMethods = [];
+    // Extremely ugly hack to register a callback so we can respond to calendar.disableDropOnMorePopover()
+    const g = window as any;
+    if (typeof g.fcMorePopoverDisableDropMethods === 'undefined') {
+      g.fcMorePopoverDisableDropMethods = [];
     }
-    (window as any).fcMorePopoverDisableDropMethods.push(this.handleMorePopoverDisableDrop);
-  }
-
-  setState(state: TableState) {
-    console.log("Table.setState() arguments:", arguments);
-    super.setState(state);
+    g.fcMorePopoverDisableDropMethods.push(this.handleMorePopoverDisableDrop);
   }
 
   render() {
-    console.log("Table.render() state:", this.state);
-    console.log("Table.render() props", this.props);
-
     let { props } = this
     let { dateProfile, dayMaxEventRows, dayMaxEvents, expandRows } = props
     let { morePopoverState } = this.state
@@ -256,23 +244,13 @@ export class Table extends DateComponent<TableProps, TableState> {
   }
 
 
-  handleMorePopoverClose = () => {
-    this.setState({
-      morePopoverState: null
-    })
-  }
-
-
   handleMorePopoverDisableDrop = () => {
     // If "More Events" popover is displayed, change its hitLayer to -1
     // Otherwise, do nothing
     const newState: TableState = { ...this.state };
     if (newState.morePopoverState) {
-      console.debug(`Table.handleMorePopoverDisableDrop() updating state`);
       newState.morePopoverState.hitLayer = -1;
       this.setState(newState);
-    } else {
-      console.debug(`Table.handleMorePopoverDisableDrop() doing nothing`);
     }
   }
 

@@ -270,25 +270,6 @@ export class CalendarApi {
   }
 
 
-  closeMorePopover() {
-    console.debug('closeMorePopover()')
-    const w = window as any
-    if (w.fcMorePopoverCloseMethods) {
-      w.fcMorePopoverCloseMethods.forEach(close => {
-        console.debug(`Calling close method:`, close);
-        close();
-      });
-    } else {
-      console.warn(`window.fcMorePopoverCloseMethods does not exist`);
-    }
-    /*
-    this.dispatch({
-      type: 'CLOSE_MORE_POPOVER'
-    })
-    */
-  }
-
-
   disableDropOnMorePopover() {
     console.debug(`Calendar.disableDropOnMorePopover()`);
     const w = window as any;
