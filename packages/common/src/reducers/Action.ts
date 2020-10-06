@@ -27,8 +27,6 @@ export type Action =
   { type: 'SET_EVENT_RESIZE', state: EventInteractionState } |
   { type: 'UNSET_EVENT_RESIZE' } |
 
-  { type: 'CLOSE_MORE_POPOVER' } |
-
   { type: 'ADD_EVENT_SOURCES', sources: EventSource<any>[] } |
   { type: 'REMOVE_EVENT_SOURCE', sourceId: string } |
   { type: 'REMOVE_ALL_EVENT_SOURCES' } |

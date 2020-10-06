@@ -53,7 +53,7 @@ interface TableState {
   morePopoverState: MorePopoverState | null
 }
 
-export interface MorePopoverState extends MoreLinkArg {
+interface MorePopoverState extends MoreLinkArg {
   currentFgEventSegs: TableSeg[]
   hitLayer: number
 }
@@ -241,6 +241,13 @@ export class Table extends DateComponent<TableProps, TableState> {
     } else if (typeof clickOption === 'string') { // a view name
       context.calendarApi.zoomTo(arg.date, clickOption)
     }
+  }
+
+
+  handleMorePopoverClose = () => {
+    this.setState({
+      morePopoverState: null
+    })
   }
 
 

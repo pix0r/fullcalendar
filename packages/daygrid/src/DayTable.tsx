@@ -50,9 +50,6 @@ export class DayTable extends DateComponent<DayTableProps, ViewContext> {
 
 
   render() {
-    console.log("DayTable.render() props:", this.props);
-    console.log("DayTable.render() context:", this.context);
-
     let { props, context } = this
 
     return (
