@@ -270,6 +270,20 @@ export class CalendarApi {
   }
 
 
+  disableDropOnMorePopover() {
+    console.debug(`Calendar.disableDropOnMorePopover()`);
+    const w = window as any;
+    if (w.fcMorePopoverDisableDropMethods) {
+      w.fcMorePopoverDisableDropMethods.forEach(disableDrop => {
+        console.debug(`Calling disableDrop method:`, disableDrop);
+        disableDrop();
+      });
+    } else {
+      console.warn(`window.fcMorePopoverDisableDropMethods does not exist`);
+    }
+  }
+
+
   // for external API
   getDate(): Date {
     let state = this.getCurrentData()
