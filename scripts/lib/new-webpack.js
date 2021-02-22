@@ -13,6 +13,8 @@ function buildEntryMap(structs) {
     entryMap[removeExt(path.join(struct.dir, struct.mainDistJs))] = './' + path.join(struct.dir, struct.mainSrc)
   }
 
+  console.log("built entry map:", entryMap)
+
   return entryMap
 }
 
