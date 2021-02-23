@@ -1,10 +1,21 @@
-import { DateComponent, DateMarker, createElement, EventInstanceHash, Hit, addDays, DateRange, getSegMeta, DayCellRoot, DayCellContent, DateProfile } from '@fullcalendar/common'
+import {
+  DateComponent,
+  DateMarker,
+  createElement,
+  EventInstanceHash,
+  addDays,
+  DateRange,
+  getSegMeta,
+  DayCellRoot,
+  DayCellContent,
+  DateProfile,
+  createRef,
+} from '@fullcalendar/common'
 import { TableSeg } from './TableSeg'
 import { TableBlockEvent } from './TableBlockEvent'
 import { TableListItemEvent } from './TableListItemEvent'
 import { Popover } from './Popover'
 import { hasListItemDisplay } from './event-rendering'
-
 
 export interface MorePopoverProps {
   date: DateMarker
@@ -19,11 +30,8 @@ export interface MorePopoverProps {
   hitLayer: number | null
 }
 
-
 export class MorePopover extends DateComponent<MorePopoverProps> {
-
-  private popoverEl: HTMLElement
-
+  private rootElRef = createRef<HTMLElement>()
 
   render() {
     let { options, dateEnv } = this.context
@@ -32,12 +40,12 @@ export class MorePopover extends DateComponent<MorePopoverProps> {
     let title = dateEnv.format(date, options.dayPopoverFormat)
 
     return (
-      <DayCellRoot date={date} dateProfile={dateProfile} todayRange={todayRange} elRef={this.handlePopoverEl}>
+      <DayCellRoot date={date} dateProfile={dateProfile} todayRange={todayRange} elRef={this.rootElRef}>
         {(rootElRef, dayClassNames, dataAttrs) => (
           <Popover
             elRef={rootElRef}
             title={title}
-            extraClassNames={[ 'fc-more-popover' ].concat(dayClassNames)}
+            extraClassNames={['fc-more-popover'].concat(dayClassNames)}
             extraAttrs={dataAttrs}
             onClose={props.onCloseClick}
             alignmentEl={props.alignmentEl}
@@ -46,7 +54,7 @@ export class MorePopover extends DateComponent<MorePopoverProps> {
             <DayCellContent date={date} dateProfile={dateProfile} todayRange={todayRange}>
               {(innerElRef, innerContent) => (
                 innerContent &&
-                  <div className='fc-more-popover-misc' ref={innerElRef}>{innerContent}</div>
+                  <div className="fc-more-popover-misc" ref={innerElRef}>{innerContent}</div>
               )}
             </DayCellContent>
             {props.segs.map((seg) => {
@@ -54,20 +62,21 @@ export class MorePopover extends DateComponent<MorePopoverProps> {
 
               return (
                 <div
-                  className='fc-daygrid-event-harness'
+                  className="fc-daygrid-event-harness"
                   key={instanceId}
                   style={{
-                    visibility: hiddenInstances[instanceId] ? 'hidden' : ('' as any)
+                    visibility: hiddenInstances[instanceId] ? 'hidden' : ('' as any),
                   }}
                 >
-                  {hasListItemDisplay(seg) ?
+                  {hasListItemDisplay(seg) ? (
                     <TableListItemEvent
                       seg={seg}
                       isDragging={false}
                       isSelected={instanceId === selectedInstanceId}
                       defaultDisplayEventEnd={false}
                       {...getSegMeta(seg, todayRange)}
-                    /> :
+                    />
+                  ) : (
                     <TableBlockEvent
                       seg={seg}
                       isDragging={false}
@@ -77,7 +86,7 @@ export class MorePopover extends DateComponent<MorePopoverProps> {
                       defaultDisplayEventEnd={false}
                       {...getSegMeta(seg, todayRange)}
                     />
-                  }
+                  )}
                 </div>
               )
             })}
@@ -87,46 +96,41 @@ export class MorePopover extends DateComponent<MorePopoverProps> {
     )
   }
 
+  positionToHit(positionLeft: number, positionTop: number, originEl: HTMLElement) {
+    let rootEl = this.rootElRef.current
 
-  handlePopoverEl = (popoverEl: HTMLElement | null) => {
-    this.popoverEl = popoverEl
-
-    if (popoverEl) {
-      this.context.registerInteractiveComponent(this, {
-        el: popoverEl,
-        useEventCenter: false
-      })
-    } else {
-      this.context.unregisterInteractiveComponent(this)
+    if (!originEl || !rootEl) { // why?
+      return null
     }
-  }
 
-
-  queryHit(positionLeft: number, positionTop: number, elWidth: number, elHeight: number): Hit | null {
+    let originRect = originEl.getBoundingClientRect()
+    let elRect = rootEl.getBoundingClientRect()
+    let newOriginLeft = elRect.left - originRect.left
+    let newOriginTop = elRect.top - originRect.top
+    let localLeft = positionLeft - newOriginLeft
+    let localTop = positionTop - newOriginTop
     let date = this.props.date
 
-    if (positionLeft < elWidth && positionTop < elHeight) {
+    if ( // ugly way to detect intersection
+      localLeft >= 0 && localLeft < elRect.width &&
+      localTop >= 0 && localTop < elRect.height
+    ) {
       return {
-        component: this,
         dateSpan: {
           allDay: true,
-          range: { start: date, end: addDays(date, 1) }
+          range: { start: date, end: addDays(date, 1) },
         },
-        dayEl: this.popoverEl,
-        rect: {
-          left: 0,
-          top: 0,
-          right: elWidth,
-          bottom: elHeight
+        dayEl: rootEl,
+        relativeRect: {
+          left: newOriginLeft,
+          top: newOriginTop,
+          right: elRect.width,
+          bottom: elRect.height,
         },
         layer: this.props.hitLayer,
       }
     }
+
+    return null
   }
-
-
-  isPopover() {
-    return true // gross
-  }
-
 }

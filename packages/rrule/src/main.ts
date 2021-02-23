@@ -1,141 +1,172 @@
-import { RRule, rrulestr } from 'rrule'
+import { RRule, RRuleSet, rrulestr, Options as RRuleOptions } from 'rrule'
 import {
   RecurringType,
   EventRefined,
   DateEnv,
   DateRange,
   DateMarker,
-  createPlugin
+  createPlugin,
+  parseMarker,
+  DateInput,
 } from '@fullcalendar/common'
-import { RRULE_EVENT_REFINERS } from './event-refiners'
+import { RRULE_EVENT_REFINERS, RRuleInputObject } from './event-refiners'
 import './event-declare'
 
+interface EventRRuleData {
+  rruleSet: RRuleSet
+  isTimeZoneSpecified: boolean
+}
 
-let recurring: RecurringType<RRule> = {
+let recurring: RecurringType<EventRRuleData> = {
+  parse(eventProps: EventRefined, dateEnv: DateEnv) {
+    if (eventProps.rrule != null) {
+      let eventRRuleData = parseEventRRule(eventProps, dateEnv)
 
-  parse(refined: EventRefined, dateEnv: DateEnv) {
-
-    if (refined.rrule != null) {
-      let parsed = parseRRule(refined.rrule, dateEnv)
-
-      if (parsed) {
+      if (eventRRuleData) {
         return {
-          typeData: parsed.rrule,
-          allDayGuess: parsed.allDayGuess,
-          duration: refined.duration
+          typeData: { rruleSet: eventRRuleData.rruleSet, isTimeZoneSpecified: eventRRuleData.isTimeZoneSpecified },
+          allDayGuess: !eventRRuleData.isTimeSpecified,
+          duration: eventProps.duration,
         }
       }
     }
 
     return null
   },
+  expand(eventRRuleData: EventRRuleData, framingRange: DateRange, dateEnv: DateEnv): DateMarker[] {
+    let dates: DateMarker[]
 
-  expand(rrule: RRule, framingRange: DateRange): DateMarker[] {
-    // we WANT an inclusive start and in exclusive end, but the js rrule lib will only do either BOTH
-    // inclusive or BOTH exclusive, which is stupid: https://github.com/jakubroztocil/rrule/issues/84
-    // Workaround: make inclusive, which will generate extra occurences, and then trim.
-    return rrule.between(framingRange.start, framingRange.end, true)
-      .filter(date => date.valueOf() < framingRange.end.valueOf())
-  }
-
+    if (eventRRuleData.isTimeZoneSpecified) {
+      dates = eventRRuleData.rruleSet.between(
+        dateEnv.toDate(framingRange.start), // rrule lib will treat as UTC-zoned
+        dateEnv.toDate(framingRange.end), // (same)
+        true, // inclusive (will give extra events at start, see https://github.com/jakubroztocil/rrule/issues/84)
+      ).map((date) => dateEnv.createMarker(date)) // convert UTC-zoned-date to locale datemarker
+    } else {
+      // when no timezone in given start/end, the rrule lib will assume UTC,
+      // which is same as our DateMarkers. no need to manipulate
+      dates = eventRRuleData.rruleSet.between(
+        framingRange.start,
+        framingRange.end,
+        true, // inclusive (will give extra events at start, see https://github.com/jakubroztocil/rrule/issues/84)
+      )
+    }
+    return dates
+  },
 }
-
 
 export default createPlugin({
-  recurringTypes: [ recurring ],
-  eventRefiners: RRULE_EVENT_REFINERS
+  recurringTypes: [recurring],
+  eventRefiners: RRULE_EVENT_REFINERS,
 })
 
+function parseEventRRule(eventProps: EventRefined, dateEnv: DateEnv) {
+  let rruleSet: RRuleSet
+  let isTimeSpecified = false
+  let isTimeZoneSpecified = false
 
-function parseRRule(input, dateEnv: DateEnv) {
-  let allDayGuess = null
-  let rrule
+  if (typeof eventProps.rrule === 'string') {
+    let res = parseRRuleString(eventProps.rrule)
+    rruleSet = res.rruleSet
+    isTimeSpecified = res.isTimeSpecified
+    isTimeZoneSpecified = res.isTimeZoneSpecified
+  }
 
-  if (typeof input === 'string') {
-    let preparseData = preparseRRuleStr(input, dateEnv)
-    rrule = rrulestr(preparseData.outStr)
-    allDayGuess = preparseData.isTimeUnspecified
+  if (typeof eventProps.rrule === 'object' && eventProps.rrule) { // non-null object
+    let res = parseRRuleObject(eventProps.rrule, dateEnv)
+    rruleSet = new RRuleSet()
+    rruleSet.rrule(res.rrule)
+    isTimeSpecified = res.isTimeSpecified
+    isTimeZoneSpecified = res.isTimeZoneSpecified
+  }
 
-  } else if (typeof input === 'object' && input) { // non-null object
-    let refined = { ...input } // copy
+  // convery to arrays. TODO: general util?
+  let exdateInputs: DateInput[] = [].concat(eventProps.exdate || [])
+  let exruleInputs: RRuleInputObject[] = [].concat(eventProps.exrule || [])
 
-    if (typeof refined.dtstart === 'string') {
-      let dtstartMeta = dateEnv.createMarkerMeta(refined.dtstart)
+  for (let exdateInput of exdateInputs) {
+    let res = parseMarker(exdateInput)
+    isTimeSpecified = isTimeSpecified || !res.isTimeUnspecified
+    isTimeZoneSpecified = isTimeZoneSpecified || res.timeZoneOffset !== null
+    rruleSet.exdate(
+      new Date(res.marker.valueOf() - (res.timeZoneOffset || 0) * 60 * 1000), // NOT DRY
+    )
+  }
 
-      if (dtstartMeta) {
-        refined.dtstart = dtstartMeta.marker
-        allDayGuess = dtstartMeta.isTimeUnspecified
-      } else {
-        delete refined.dtstart
+  // TODO: exrule is deprecated. what to do? (https://icalendar.org/iCalendar-RFC-5545/a-3-deprecated-features.html)
+  for (let exruleInput of exruleInputs) {
+    let res = parseRRuleObject(exruleInput, dateEnv)
+    isTimeSpecified = isTimeSpecified || res.isTimeSpecified
+    isTimeZoneSpecified = isTimeZoneSpecified || res.isTimeZoneSpecified
+    rruleSet.exrule(res.rrule)
+  }
+
+  return { rruleSet, isTimeSpecified, isTimeZoneSpecified }
+}
+
+function parseRRuleObject(rruleInput: RRuleInputObject, dateEnv: DateEnv) {
+  let isTimeSpecified = false
+  let isTimeZoneSpecified = false
+
+  function processDateInput(dateInput: DateInput) {
+    if (typeof dateInput === 'string') {
+      let markerData = parseMarker(dateInput)
+      if (markerData) {
+        isTimeSpecified = isTimeSpecified || !markerData.isTimeUnspecified
+        isTimeZoneSpecified = isTimeZoneSpecified || markerData.timeZoneOffset !== null
+        return new Date(markerData.marker.valueOf() - (markerData.timeZoneOffset || 0) * 60 * 1000) // NOT DRY
       }
+      return null
     }
-
-    if (typeof refined.until === 'string') {
-      refined.until = dateEnv.createMarker(refined.until)
-    }
-
-    if (refined.freq != null) {
-      refined.freq = convertConstant(refined.freq)
-    }
-
-    if (refined.wkst != null) {
-      refined.wkst = convertConstant(refined.wkst)
-    } else {
-      refined.wkst = (dateEnv.weekDow - 1 + 7) % 7 // convert Sunday-first to Monday-first
-    }
-
-    if (refined.byweekday != null) {
-      refined.byweekday = convertConstants(refined.byweekday) // the plural version
-    }
-
-    rrule = new RRule(refined)
+    return dateInput as Date // TODO: what about number timestamps?
   }
 
-  if (rrule) {
-    return { rrule, allDayGuess }
+  let rruleOptions: Partial<RRuleOptions> = {
+    ...rruleInput,
+    dtstart: processDateInput(rruleInput.dtstart),
+    until: processDateInput(rruleInput.until),
+    freq: convertConstant(rruleInput.freq),
+    wkst: rruleInput.wkst == null
+      ? (dateEnv.weekDow - 1 + 7) % 7 // convert Sunday-first to Monday-first
+      : convertConstant(rruleInput.wkst),
+    byweekday: convertConstants(rruleInput.byweekday),
   }
 
-  return null
+  return { rrule: new RRule(rruleOptions), isTimeSpecified, isTimeZoneSpecified }
 }
 
+function parseRRuleString(str) {
+  let rruleSet = rrulestr(str, { forceset: true }) as RRuleSet
+  let analysis = analyzeRRuleString(str)
 
-function preparseRRuleStr(str, dateEnv: DateEnv) {
-  let isTimeUnspecified: boolean | null = null
+  return { rruleSet, ...analysis }
+}
 
-  function processAndReplace(whole: string, introPart: string, datePart: string) {
-    let res = dateEnv.parse(datePart)
-    if (res) {
-      if (res.isTimeUnspecified) {
-        isTimeUnspecified = true
-      }
-      return introPart + formatRRuleDate(res.marker)
-    } else {
-      return whole
-    }
+function analyzeRRuleString(str) {
+  let isTimeSpecified = false
+  let isTimeZoneSpecified = false
+
+  function processMatch(whole: string, introPart: string, datePart: string) {
+    let result = parseMarker(datePart)
+    isTimeSpecified = isTimeSpecified || !result.isTimeUnspecified
+    isTimeZoneSpecified = isTimeZoneSpecified || result.timeZoneOffset !== null
   }
 
-  str = str.replace(/\b(DTSTART:)([^\n]*)/, processAndReplace)
-  str = str.replace(/\b(EXDATE:)([^\n]*)/, processAndReplace)
-  str = str.replace(/\b(UNTIL=)([^;]*)/, processAndReplace)
+  str.replace(/\b(DTSTART:)([^\n]*)/, processMatch)
+  str.replace(/\b(EXDATE:)([^\n]*)/, processMatch)
+  str.replace(/\b(UNTIL=)([^;]*)/, processMatch)
 
-  return { outStr: str, isTimeUnspecified }
+  return { isTimeSpecified, isTimeZoneSpecified }
 }
 
-
-function formatRRuleDate(date: DateMarker) { // like '20200101T123030Z'
-  return date.toISOString().replace(/[-:]/g, '').replace('.000', '')
-}
-
-
-function convertConstants(input) {
+function convertConstants(input): number | null | number[] | null[] {
   if (Array.isArray(input)) {
     return input.map(convertConstant)
   }
   return convertConstant(input)
 }
 
-
-function convertConstant(input) {
+function convertConstant(input): number | null {
   if (typeof input === 'string') {
     return RRule[input.toUpperCase()]
   }

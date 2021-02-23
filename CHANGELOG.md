@@ -1,4 +1,52 @@
 
+v5.5.1 (2021-01-16)
+-------------------
+
+- view styles lost after changing to view with allDaySlot:false, view-specific dayHeaders (#6069)
+- type error when slotDuration is in whole days (#5952)
+- rrule byweekday property not working (#6059)
+- support for recurring events in iCalendar feed (#6068)
+- add Indian/Tamil language support (#6061)
+- error in @fullcalendar/scrollgrid with NextJS (SSR) (#6037)
+- removed unnecessary use of Promise in icalendar package. restores IE11 compatibility
+
+
+v5.5.0 (2020-12-19)
+-------------------
+
+- icalendar support (#1580)
+- support exrule and exdate for rrule plugin (#4439)
+- support for Angular 11
+- fix: recurring events missing with dtstart in UTC and timeZone not UTC (#5993)
+- fix: events can have a gap between and take more rows than dayMaxEventRows when using eventOrder (#5883)
+- fix: events dragged from the More popup to another resource drop on the wrong resource (#5593)
+- fix: week number rendered twice in ResourceTimeGridView (#5890)
+- fix: nowIndicator not positioned correctly for resourceTimelineYear view with slot duration 1 month (#5999)
+- fix: oldResource and newResource missing from EventDropArg typescript definition (#6010)
+- fix: loading callback fires before resources are done loading and again after (#5896)
+- fix: locales are not compatible with IE 11 (#6014)
+- fix: IE11 freezes trying to display dayGrid with dayMinWidth (#5971)
+- fix: calling revert func within eventChange would erase affected event
+- locale: add Armenian
+- locale: add Austrian
+- locale: add Welsh
+- locale: add Esperanto
+- locale: improve Dutch
+- breaking-change: EventDropArg typescript type moved from interaction package to core
+
+
+v5.4.0 (2020-11-11)
+-------------------
+
+- new fixedMirrorParent settings for drag-n-drop. workaround for #4673
+- rrule exclusion doesn't work while adding the 'Z' char for RRule datetimes (#5726)
+- fix JS error when using dayMaxEventRows on small screens (#5850, #5863)
+- export types for ResourceFunc and ResourceInput (#5797)
+- more descriptive license key warning (#5910)
+- better compatibility with Webpack 5, deeming `resolve.fullySpecified` unnecessary (#5822)
+- dist files now include a CJS file. ESM is still used by default in most environments (#5929)
+
+
 v5.3.2 (2020-09-06)
 -------------------
 

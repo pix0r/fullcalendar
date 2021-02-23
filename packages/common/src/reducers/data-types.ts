@@ -15,7 +15,6 @@ import { DateSpan } from '../structs/date-span'
 import { EventInteractionState } from '../interactions/event-interaction-state'
 import { CalendarOptionsRefined, ViewOptionsRefined, CalendarOptions, CalendarListeners } from '../options'
 
-
 export interface CalendarDataManagerState {
   dynamicOptionOverrides: CalendarOptions
   currentViewType: string
@@ -24,7 +23,6 @@ export interface CalendarDataManagerState {
   businessHours: EventStore
   eventSources: EventSourceHash
   eventUiBases: EventUiHash
-  loadingLevel: number
   eventStore: EventStore
   renderableEventStore: EventStore
   dateSelection: DateSpan | null
@@ -51,7 +49,6 @@ export interface CalendarCurrentViewData {
   viewApi: ViewApi
   dateProfileGenerator: DateProfileGenerator
 }
-
 
 type CalendarDataBase = CalendarOptionsData & CalendarCurrentViewData & CalendarDataManagerState
 

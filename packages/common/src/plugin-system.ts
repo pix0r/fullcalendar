@@ -2,15 +2,14 @@ import { guid } from './util/misc'
 import { PluginDefInput, PluginDef, PluginHooks } from './plugin-system-struct'
 import { isArraysEqual } from './util/array'
 
-
 // TODO: easier way to add new hooks? need to update a million things
-
 
 export function createPlugin(input: PluginDefInput): PluginDef {
   return {
     id: guid(),
     deps: input.deps || [],
     reducers: input.reducers || [],
+    isLoadingFuncs: input.isLoadingFuncs || [],
     contextInit: [].concat(input.contextInit || []),
     eventRefiners: input.eventRefiners || {},
     eventDefMemberAdders: input.eventDefMemberAdders || [],
@@ -42,15 +41,15 @@ export function createPlugin(input: PluginDefInput): PluginDef {
     contentTypeHandlers: input.contentTypeHandlers || {},
     listenerRefiners: input.listenerRefiners || {},
     optionRefiners: input.optionRefiners || {},
-    propSetHandlers: input.propSetHandlers || {}
+    propSetHandlers: input.propSetHandlers || {},
   }
 }
-
 
 function buildPluginHooks(pluginDefs: PluginDef[], globalDefs: PluginDef[]): PluginHooks {
   let isAdded: { [pluginId: string]: boolean } = {}
   let hooks: PluginHooks = {
     reducers: [],
+    isLoadingFuncs: [],
     contextInit: [],
     eventRefiners: {},
     eventDefMemberAdders: [],
@@ -82,7 +81,7 @@ function buildPluginHooks(pluginDefs: PluginDef[], globalDefs: PluginDef[]): Plu
     contentTypeHandlers: {},
     listenerRefiners: {},
     optionRefiners: {},
-    propSetHandlers: {}
+    propSetHandlers: {},
   }
 
   function addDefs(defs: PluginDef[]) {
@@ -104,13 +103,12 @@ function buildPluginHooks(pluginDefs: PluginDef[], globalDefs: PluginDef[]): Plu
   return hooks
 }
 
-
 export function buildBuildPluginHooks() { // memoizes
   let currentOverrideDefs: PluginDef[] = []
   let currentGlobalDefs: PluginDef[] = []
   let currentHooks: PluginHooks
 
-  return function(overrideDefs: PluginDef[], globalDefs: PluginDef[]) {
+  return (overrideDefs: PluginDef[], globalDefs: PluginDef[]) => {
     if (!currentHooks || !isArraysEqual(overrideDefs, currentOverrideDefs) || !isArraysEqual(globalDefs, currentGlobalDefs)) {
       currentHooks = buildPluginHooks(overrideDefs, globalDefs)
     }
@@ -120,10 +118,10 @@ export function buildBuildPluginHooks() { // memoizes
   }
 }
 
-
 function combineHooks(hooks0: PluginHooks, hooks1: PluginHooks): PluginHooks {
   return {
     reducers: hooks0.reducers.concat(hooks1.reducers),
+    isLoadingFuncs: hooks0.isLoadingFuncs.concat(hooks1.isLoadingFuncs),
     contextInit: hooks0.contextInit.concat(hooks1.contextInit),
     eventRefiners: { ...hooks0.eventRefiners, ...hooks1.eventRefiners },
     eventDefMemberAdders: hooks0.eventDefMemberAdders.concat(hooks1.eventDefMemberAdders),
@@ -155,6 +153,6 @@ function combineHooks(hooks0: PluginHooks, hooks1: PluginHooks): PluginHooks {
     contentTypeHandlers: { ...hooks0.contentTypeHandlers, ...hooks1.contentTypeHandlers },
     listenerRefiners: { ...hooks0.listenerRefiners, ...hooks1.listenerRefiners },
     optionRefiners: { ...hooks0.optionRefiners, ...hooks1.optionRefiners },
-    propSetHandlers: { ...hooks0.propSetHandlers, ...hooks1.propSetHandlers }
+    propSetHandlers: { ...hooks0.propSetHandlers, ...hooks1.propSetHandlers },
   }
 }

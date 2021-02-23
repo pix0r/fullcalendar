@@ -1,12 +1,16 @@
-import { identity, Identity } from '@fullcalendar/common'
+import { identity, Identity, EventDropArg } from '@fullcalendar/common'
 
 // public
 import {
   DateClickArg,
-  EventDragStartArg, EventDragStopArg, EventDropArg,
+  EventDragStartArg, EventDragStopArg,
   EventResizeStartArg, EventResizeStopArg, EventResizeDoneArg,
-  DropArg, EventReceiveArg, EventLeaveArg
+  DropArg, EventReceiveArg, EventLeaveArg,
 } from './api-type-deps'
+
+export const OPTION_REFINERS = {
+  fixedMirrorParent: identity as Identity<HTMLElement>,
+}
 
 export const LISTENER_REFINERS = {
   dateClick: identity as Identity<(arg: DateClickArg) => void>,
@@ -18,5 +22,5 @@ export const LISTENER_REFINERS = {
   eventResize: identity as Identity<(arg: EventResizeDoneArg) => void>,
   drop: identity as Identity<(arg: DropArg) => void>,
   eventReceive: identity as Identity<(arg: EventReceiveArg) => void>,
-  eventLeave: identity as Identity<(arg: EventLeaveArg) => void>
+  eventLeave: identity as Identity<(arg: EventLeaveArg) => void>,
 }

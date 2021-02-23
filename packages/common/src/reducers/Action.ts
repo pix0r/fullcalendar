@@ -34,9 +34,16 @@ export type Action =
   { type: 'FETCH_EVENT_SOURCES', sourceIds?: string[] } | // if no sourceIds, fetch all
 
   { type: 'RECEIVE_EVENTS', sourceId: string, fetchId: string, fetchRange: DateRange | null, rawEvents: EventInput[] } |
-  { type: 'RECEIVE_EVENT_ERROR', sourceId: string, fetchId: string, fetchRange: DateRange | null, error: EventSourceError } | // need all these?
+  {
+    type: 'RECEIVE_EVENT_ERROR'
+    sourceId: string
+    fetchId: string
+    fetchRange: DateRange | null
+    error: EventSourceError
+  } | // need all these?
 
   { type: 'ADD_EVENTS', eventStore: EventStore } |
+  { type: 'RESET_EVENTS', eventStore: EventStore } |
   { type: 'MERGE_EVENTS', eventStore: EventStore } |
   { type: 'REMOVE_EVENTS', eventStore: EventStore } |
   { type: 'REMOVE_ALL_EVENTS' }

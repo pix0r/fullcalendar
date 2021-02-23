@@ -1,4 +1,3 @@
-
 export { CalendarOptions, CalendarListeners } from './options'
 export { DateInput } from './datelib/env'
 export { DurationInput } from './datelib/duration'
@@ -25,7 +24,7 @@ export {
   SlotLabelContentArg, SlotLabelMountArg,
   AllDayContentArg, AllDayMountArg,
   DayHeaderContentArg,
-  DayHeaderMountArg
+  DayHeaderMountArg,
 } from './render-hook-misc'
 export { DayCellContentArg, DayCellMountArg } from './common/DayCellRoot'
 export { ViewContentArg, ViewMountArg } from './common/ViewRoot'
@@ -38,4 +37,4 @@ export { WeekNumberCalculation } from './datelib/env'
 export { ToolbarInput, CustomButtonInput, ButtonIconsInput, ButtonTextCompoundInput } from './toolbar-struct'
 export { EventContentArg, EventMountArg } from './component/event-rendering'
 export { DatesSetArg } from './dates-set'
-export { EventAddArg, EventChangeArg, EventRemoveArg } from './event-crud'
+export { EventAddArg, EventChangeArg, EventDropArg, EventRemoveArg } from './event-crud'

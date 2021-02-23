@@ -1,21 +1,22 @@
 {
   "name": "@fullcalendar/rrule",
-  "version": "5.3.1",
+  "version": "5.5.1",
   "title": "FullCalendar RRule Plugin",
   "description": "A connector to the RRule library, for recurring events",
   "docs": "https://fullcalendar.io/docs/rrule-plugin",
   "dependencies": {
-    "@fullcalendar/common": "~5.3.1",
-    "tslib": "^2.0.0"
+    "@fullcalendar/common": "workspace:~5.5.0",
+    "tslib": "^2.0.3"
   },
   "peerDependencies": {
     "rrule": "^2.6.0"
   },
   "devDependencies": {
+    "@fullcalendar/core-preact": "workspace:*",
     "rrule": "^2.6.0"
   },
-  "type": "module",
-  "main": "main.js",
+  "main": "main.cjs.js",
+  "module": "main.js",
   "types": "main.d.ts",
   "jsdelivr": "main.global.min.js",
   "browserGlobal": "FullCalendarRRule",
