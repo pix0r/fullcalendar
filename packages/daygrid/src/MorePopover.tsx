@@ -27,6 +27,7 @@ export interface MorePopoverProps {
   topAlignmentEl?: HTMLElement
   onCloseClick?: () => void
   todayRange: DateRange
+  hitLayer: number | null
 }
 
 export class MorePopover extends DateComponent<MorePopoverProps> {
@@ -126,7 +127,7 @@ export class MorePopover extends DateComponent<MorePopoverProps> {
           right: elRect.width,
           bottom: elRect.height,
         },
-        layer: 1, // important when comparing with hits from other components
+        layer: this.props.hitLayer,
       }
     }
 

@@ -57,6 +57,7 @@ interface MorePopoverState extends MoreLinkArg {
   currentFgEventSegs: TableSeg[]
   fromRow: number
   fromCol: number
+  hitLayer: number
 }
 
 export class Table extends DateComponent<TableProps, TableState> {
@@ -75,6 +76,17 @@ export class Table extends DateComponent<TableProps, TableState> {
 
   state: TableState = {
     morePopoverState: null,
+  }
+
+  constructor() {
+    super()
+
+    // Extremely ugly hack to register a callback so we can respond to calendar.disableDropOnMorePopover()
+    const g = window as any;
+    if (typeof g.fcMorePopoverDisableDropMethods === 'undefined') {
+      g.fcMorePopoverDisableDropMethods = [];
+    }
+    g.fcMorePopoverDisableDropMethods.push(this.handleMorePopoverDisableDrop);
   }
 
   render() {
@@ -181,6 +193,7 @@ export class Table extends DateComponent<TableProps, TableState> {
                       {}
                     }
                     todayRange={todayRange}
+                    hitLayer={morePopoverState.hitLayer}
                   />
                 )
               }
